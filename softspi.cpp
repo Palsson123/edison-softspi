@@ -1,31 +1,5 @@
 #include "softspi.h"
-#ifdef LOCAL
-#define MRAA_GPIO_OUT 1
-#define MRAA_GPIO_IN  2
-typedef void* mraa_gpio_context;
-mraa_gpio_context mraa_gpio_init(uint32_t pin) {
-  printf("mraa_gpio_init %d\n", pin);
-  return (void*)pin;
-}
-void mraa_gpio_dir(mraa_gpio_context ctx, int dir) {
-  printf("mraa_gpio_dir %p %d\n", ctx, dir);
-}
-void mraa_gpio_use_mmaped(mraa_gpio_context ctx, int mmaped) {
-  printf("mraa_gpio_use_mmaped %p %d\n", ctx, mmaped);
-}
-void mraa_gpio_close(mraa_gpio_context ctx) {
-  printf("mraa_gpio_close %p\n", ctx);
-}
-void mraa_gpio_write(mraa_gpio_context ctx, int b) {
-  printf("mraa_gpio_write %p %d\n", ctx, b);
-}
-int  mraa_gpio_read(mraa_gpio_context ctx) {
-  printf("mraa_gpio_read %p\n", ctx);
-  return 0;
-}
-#else
 #include <mraa/gpio.h>
-#endif
 
 void usleep(uint32_t sleepLoopCount);
 
@@ -69,7 +43,7 @@ NAN_METHOD(softSpi_transfer) {
   mraa_gpio_dir(miso, MRAA_GPIO_IN);
   mraa_gpio_use_mmaped(miso, 1);
 
-  int32_t sleepLoopCount = 0.999 * (1.0 / (double)frequency) * (1000.0 * 1000.0) / 2.0 - 92.5;
+  int32_t sleepLoopCount = (1.0 / (double)frequency) * (67050000.0) / 2.0;
   if(sleepLoopCount < 0) {
     sleepLoopCount = 1;
   }
@@ -124,9 +98,6 @@ uint8_t softSpi_writeBit(
 }
 
 void usleep(uint32_t sleepLoopCount) {
-  #ifdef LOCAL
-  printf("usleep %d\n", sleepLoopCount);
-  #endif
   volatile uint32_t i;
   for(i = 1; i < sleepLoopCount; i++);
 }

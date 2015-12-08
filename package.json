@@ -3,6 +3,10 @@
   "version": "0.0.1",
   "description": "Software SPI driver for Intel Edison",
   "main": "index.js",
+  "scripts": {
+    "configure": "./node_modules/.bin/node-gyp configure",
+    "build": "./node_modules/.bin/node-gyp build"
+  },
   "repository": "git@github.com:joeferner/edison-softspi.git",
   "keywords": [
     "intel",
@@ -16,6 +20,7 @@
   },
   "devDependencies": {
     "nan": "^2.1.0",
-    "mraa": "^0.8.1"
+    "mraa": "^0.8.1",
+    "node-gyp": "^3.2.1"
   }
 }
