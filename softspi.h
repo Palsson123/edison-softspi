@@ -2,8 +2,50 @@
 #define _SOFTSPI_H_
 
 #include <nan.h>
+#include <mraa/gpio.h>
 
-NAN_METHOD(softSpi_transfer);
+class SoftSpi : public Nan::ObjectWrap {
+public:
+  typedef enum {
+    SPI_MODE0 = 0,
+    SPI_MODE1 = 1,
+    SPI_MODE2 = 2,
+    SPI_MODE3 = 3
+  } SpiMode;
+
+  const uint32_t DEFAULT_FREQUENCY = 10000;
+  const SpiMode DEFAULT_SPI_MODE = SPI_MODE0;
+
+  static NAN_MODULE_INIT(Init);
+
+  void setFrequency(uint32_t frequency);
+  void setMode(SpiMode mode);
+  void write(uint8_t* buffer, uint32_t length);
+
+private:
+  mraa_gpio_context m_sck;
+  mraa_gpio_context m_mosi;
+  mraa_gpio_context m_miso;
+  SpiMode m_mode;
+  uint32_t m_frequency;
+  uint32_t m_clockSleepCount;
+
+  explicit SoftSpi(
+    mraa_gpio_context sck,
+    mraa_gpio_context mosi,
+    mraa_gpio_context miso
+  );
+  ~SoftSpi();
+
+  static NAN_METHOD(New);
+  static NAN_METHOD(write);
+  static NAN_METHOD(frequency);
+  static NAN_METHOD(mode);
+  static Nan::Persistent<v8::Function> constructor;
+
+  uint8_t writeByte(uint8_t b);
+  uint8_t writeBit(uint8_t b);
+  void usleepByCounting(uint32_t sleepCount);
+};
 
 #endif
-
