@@ -15,11 +15,14 @@ public:
 
   const uint32_t DEFAULT_FREQUENCY = 10000;
   const SpiMode DEFAULT_SPI_MODE = SPI_MODE0;
+  const uint32_t DEFAULT_BETWEEN_BYTE_DELAY_US = 0;
+  const uint32_t LOOPS_PER_SECOND = 67050000;
 
   static NAN_MODULE_INIT(Init);
 
   void setFrequency(uint32_t frequency);
   void setMode(SpiMode mode);
+  void setBetweenByteDelay_us(uint32_t t);
   void write(uint8_t* buffer, uint32_t length);
 
 private:
@@ -29,6 +32,7 @@ private:
   SpiMode m_mode;
   uint32_t m_frequency;
   uint32_t m_clockSleepCount;
+  uint32_t m_betweenByteSleepCount;
 
   explicit SoftSpi(
     mraa_gpio_context sck,
@@ -41,6 +45,7 @@ private:
   static NAN_METHOD(write);
   static NAN_METHOD(frequency);
   static NAN_METHOD(mode);
+  static NAN_METHOD(betweenByteDelay_us);
   static Nan::Persistent<v8::Function> constructor;
 
   uint8_t writeByte(uint8_t b);

@@ -10,6 +10,7 @@ NAN_MODULE_INIT(SoftSpi::Init) {
   Nan::SetPrototypeMethod(tpl, "write", write);
   Nan::SetPrototypeMethod(tpl, "frequency", frequency);
   Nan::SetPrototypeMethod(tpl, "mode", mode);
+  Nan::SetPrototypeMethod(tpl, "betweenByteDelay_us", betweenByteDelay_us);
 
   constructor.Reset(Nan::GetFunction(tpl).ToLocalChecked());
   Nan::Set(target, Nan::New("SoftSpi").ToLocalChecked(), Nan::GetFunction(tpl).ToLocalChecked());
@@ -22,6 +23,7 @@ SoftSpi::SoftSpi(
 ) : m_sck(sck), m_mosi(mosi), m_miso(miso) {
   setMode(SoftSpi::DEFAULT_SPI_MODE);
   setFrequency(SoftSpi::DEFAULT_FREQUENCY);
+  setBetweenByteDelay_us(SoftSpi::DEFAULT_BETWEEN_BYTE_DELAY_US);
 }
 
 SoftSpi::~SoftSpi() {
@@ -32,7 +34,7 @@ SoftSpi::~SoftSpi() {
 
 void SoftSpi::setFrequency(uint32_t frequency) {
   m_frequency = frequency;
-  int32_t c = (1.0 / (double)frequency) * (67050000.0) / 2.0;
+  int32_t c = (1.0 / (double)frequency) * ((double)LOOPS_PER_SECOND) / 2.0;
   if(c < 0) {
     c = 1;
   }
@@ -43,10 +45,15 @@ void SoftSpi::setMode(SpiMode mode) {
   m_mode = mode;
 }
 
+void SoftSpi::setBetweenByteDelay_us(uint32_t t) {
+  m_betweenByteSleepCount = t * LOOPS_PER_SECOND;
+}
+
 void SoftSpi::write(uint8_t* buffer, uint32_t bufferLength) {
   for(uint32_t i = 0; i < bufferLength; i++) {
     uint8_t b = buffer[i];
     buffer[i] = writeByte(b);
+    usleepByCounting(m_betweenByteSleepCount);
   }
 }
 
@@ -122,6 +129,12 @@ NAN_METHOD(SoftSpi::mode) {
   SoftSpi* softSpi = Nan::ObjectWrap::Unwrap<SoftSpi>(info.This());
   SpiMode mode = (SpiMode)info[0]->ToUint32()->Value();
   softSpi->setMode(mode);
+}
+
+NAN_METHOD(SoftSpi::betweenByteDelay_us) {
+  SoftSpi* softSpi = Nan::ObjectWrap::Unwrap<SoftSpi>(info.This());
+  uint32_t t = info[0]->ToUint32()->Value();
+  softSpi->setBetweenByteDelay_us(t);
 }
 
 NAN_METHOD(SoftSpi::write) {
