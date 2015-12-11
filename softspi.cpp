@@ -46,7 +46,7 @@ void SoftSpi::setMode(SpiMode mode) {
 }
 
 void SoftSpi::setBetweenByteDelay_us(uint32_t t) {
-  m_betweenByteSleepCount = t * LOOPS_PER_SECOND;
+  m_betweenByteSleepCount = ((double)t / 1000.0 / 1000.0) * (double)LOOPS_PER_SECOND;
 }
 
 void SoftSpi::write(uint8_t* buffer, uint32_t bufferLength) {

@@ -13,10 +13,10 @@ public:
     SPI_MODE3 = 3
   } SpiMode;
 
-  const uint32_t DEFAULT_FREQUENCY = 10000;
-  const SpiMode DEFAULT_SPI_MODE = SPI_MODE0;
-  const uint32_t DEFAULT_BETWEEN_BYTE_DELAY_US = 0;
-  const uint32_t LOOPS_PER_SECOND = 67050000;
+  static const uint32_t DEFAULT_FREQUENCY = 10000;
+  static const SpiMode DEFAULT_SPI_MODE = SPI_MODE0;
+  static const uint32_t DEFAULT_BETWEEN_BYTE_DELAY_US = 0;
+  static const uint32_t LOOPS_PER_SECOND = 67050000;
 
   static NAN_MODULE_INIT(Init);
 
