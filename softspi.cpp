@@ -41,8 +41,23 @@ void SoftSpi::setFrequency(uint32_t frequency) {
   m_clockSleepCount = c;
 }
 
+// SPI Mode  CPOL  CPHA
+//    0       0     1
+//    1       0     0
+//    2       1     1
+//    3       1     0
 void SoftSpi::setMode(SpiMode mode) {
   m_mode = mode;
+
+  // CS may be asserted later before a call to write has a chance
+  // to change the SCK.
+  if (m_mode == 2 || m_mode == 3) {
+    mraa_gpio_write(m_sck, 1);
+    m_cpol = 1;
+  } else {
+    mraa_gpio_write(m_sck, 0);
+    m_cpol = 0;
+  }
 }
 
 void SoftSpi::setBetweenByteDelay_us(uint32_t t) {
@@ -69,12 +84,23 @@ uint8_t SoftSpi::writeByte(uint8_t byte) {
 }
 
 uint8_t SoftSpi::writeBit(uint8_t bit) {
-  if(m_mode == 3) {
-    // CPOL = 1, CPHA = 1, Clock idle low, data is clocked in on rising, edge output data (change) on falling edge
-    mraa_gpio_write(m_sck, 0);
+  if (m_mode == 0 || m_mode == 2) {
+    // Mode 0: CPOL = 0, CPHA = 0, Clock idle low, data is clocked in on rising edge, output data (change) on falling edge
+    // Mode 2: CPOL = 1, CPHA = 0, Clock idle low, data is clocked in on falling edge, output data (change) on rising edge
     mraa_gpio_write(m_mosi, (bit == 0) ? 0 : 1);
     usleepByCounting(m_clockSleepCount);
-    mraa_gpio_write(m_sck, 1);
+    uint8_t r = mraa_gpio_read(m_miso);
+    mraa_gpio_write(m_sck, (m_cpol == 0) ? 1 : 0);
+    usleepByCounting(m_clockSleepCount);
+    mraa_gpio_write(m_sck, (m_cpol == 0) ? 0 : 1);
+    return r;
+  } else if (m_mode == 1 || m_mode == 3) {
+    // Mode 1: CPOL = 0, CPHA = 1, Clock idle low, data is clocked in on falling edge, output data (change) on rising edge
+    // Mode 3: CPOL = 1, CPHA = 1, Clock idle low, data is clocked in on rising, edge output data (change) on falling edge
+    mraa_gpio_write(m_sck, (m_cpol == 0) ? 1 : 0);
+    mraa_gpio_write(m_mosi, (bit == 0) ? 0 : 1);
+    usleepByCounting(m_clockSleepCount);
+    mraa_gpio_write(m_sck, (m_cpol == 0) ? 0 : 1);
     uint8_t r = mraa_gpio_read(m_miso);
     usleepByCounting(m_clockSleepCount);
     return r;

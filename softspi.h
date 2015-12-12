@@ -30,6 +30,7 @@ private:
   mraa_gpio_context m_mosi;
   mraa_gpio_context m_miso;
   SpiMode m_mode;
+  uint8_t m_cpol;
   uint32_t m_frequency;
   uint32_t m_clockSleepCount;
   uint32_t m_betweenByteSleepCount;
