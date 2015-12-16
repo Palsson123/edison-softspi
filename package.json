@@ -1,6 +1,6 @@
 {
   "name": "edison-softspi",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Software SPI driver for Intel Edison",
   "main": "index.js",
   "repository": "git@github.com:joeferner/edison-softspi.git",
